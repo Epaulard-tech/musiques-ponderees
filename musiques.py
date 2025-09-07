@@ -139,7 +139,6 @@ en_mode_reclassification = False  # Indique si on est en mode reclassification
 ancienne_categorie = None  # Ancienne catégorie de la musique en cours de reclassification
 
 
-
 def synchroniser_musiques_disponibles():
     """Synchronise MUSIQUES_CLASSEES avec seulement les fichiers qui existent réellement"""
     global MUSIQUES_CLASSEES, MUSIQUES_ENREGISTREES
@@ -205,7 +204,11 @@ def parcourir_repertoire_musiques():
         print("Tous les fichiers sont déjà classés!")
         # Copier les fichiers classés vers MUSIQUES_CLASSEES
         for note, fichiers in MUSIQUES_ENREGISTREES.items():
-            MUSIQUES_CLASSEES[note] = fichiers.copy()
+            for fichier in fichiers:
+                if os.path.exists(fichier):
+                    MUSIQUES_CLASSEES[note].append(fichier)
+                else:
+                    pass
         return []
 
 def synchroniser_musiques_classees():
@@ -214,7 +217,11 @@ def synchroniser_musiques_classees():
     
     # Copier tous les fichiers classés vers MUSIQUES_CLASSEES
     for note, fichiers in MUSIQUES_ENREGISTREES.items():
-        MUSIQUES_CLASSEES[note] = fichiers.copy()
+        for fichier in fichiers:
+            if os.path.exists(fichier):
+                MUSIQUES_CLASSEES[note].append(fichier)
+            else:
+                pass
     
     print("Synchronisation des musiques terminée")
 
@@ -429,6 +436,7 @@ def jouer_musique_aleatoire():
         jouer_musique_aleatoire()
         return 
 
+
     # Sauvegarder la musique précédente AVANT de jouer la nouvelle
     if musique_en_cours:
         try:
@@ -612,7 +620,7 @@ def reclasser_musique_actuelle(note):
         en_mode_reclassification = False
         ancienne_categorie = None
         
-        afficher_texte_multiligne(f"Musique reclassée avec la note {nouvelle_note}",None,(0, 255, 0))
+        afficher_texte_multiligne(f"Musique reclassée avec la note {nouvelle_note}",None,(0, 255, 0),(255, 255, 255), temporaire=True, duree=2000)
         print(f"Musique reclassée avec la note {nouvelle_note}")
     else:
         print("Erreur: impossible de reclasser cette musique")
@@ -650,6 +658,8 @@ def toggle_pause():
 
 # Initialiser le texte d'accueil
 afficher_texte_multiligne("Appuyez sur ESPACE pour jouer une musique")
+
+
 
 # Parcourir et classer les fichiers du répertoire Musiques
 nouveaux_fichiers = parcourir_repertoire_musiques()
