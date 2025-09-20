@@ -237,10 +237,11 @@ def ignorer_nouveaux_fichiers():
 def afficher_texte_multiligne(ligne1, ligne2=None, couleur1=(255, 255, 255), couleur2=(255, 255, 255), temporaire=False, duree=2000):
     """Affiche du texte sur une ou deux lignes"""
     global texte, texte_ligne2, message_temporaire, message_temporaire_ligne2, temps_message_temporaire
-    
+
     if temporaire:
         # Message temporaire
-        message_temporaire = police.render(ligne1, True, couleur1)
+        if ligne1:
+            message_temporaire = police.render(ligne1, True, couleur1)
         if ligne2:
             message_temporaire_ligne2 = police.render(ligne2, True, couleur2)
         else:
@@ -248,7 +249,8 @@ def afficher_texte_multiligne(ligne1, ligne2=None, couleur1=(255, 255, 255), cou
         temps_message_temporaire = pygame.time.get_ticks() + duree
     else:
         # Message permanent
-        texte = police.render(ligne1, True, couleur1)
+        if ligne1:
+            texte = police.render(ligne1, True, couleur1)
         if ligne2:
             texte_ligne2 = police.render(ligne2, True, couleur2)
         else:
@@ -288,6 +290,7 @@ def classer_fichier_actuel(note):
     if fichier_en_cours_de_classification:
         ajouter_fichier_aux_categories(fichier_en_cours_de_classification, note)
         print(f"Fichier {fichier_en_cours_de_classification.split('/')[-1]} classé avec la note {note}")
+        
         
         # Passer au fichier suivant
         passer_fichier_suivant()
@@ -403,7 +406,7 @@ def jouer_musique_aleatoire():
         return
     
     # Essayer plusieurs fois de trouver une musique
-    for tentative in range(10):  # Maximum 10 tentatives
+    for tentative in range(100):  # Maximum 10 tentatives
         note_musique = randint(0, 54)
 
         # Trouver la note correspondante
@@ -546,7 +549,7 @@ def changer_note():
         # Trouver l'ancienne catégorie de cette musique
         ancienne_categorie = trouver_categorie_musique(fichier_actuel)
         ancienne_note = categorie_vers_note(ancienne_categorie)
-        afficher_texte_multiligne(f"Reclassification: {fichier_actuel.split('/')[-1].split('.')[0]}", f"Note actuelle: {ancienne_note} | 0-9: noter | +/-: ajuster | ÉCHAP: annuler", (25, 100, 255), (25, 100, 255))
+        afficher_texte_multiligne(f"Reclassification: {fichier_actuel.split('/')[-1].split('.')[0]}", f"Note actuelle: {ancienne_note} | 0-9: noter | +/-: ajuster | ÉCHAP: annuler", (25, 100, 255), (25, 100, 255), temporaire=True, duree=2000)
         print(f"Reclassification de {fichier_actuel.split('/')[-1]}")
     else:
         afficher_texte_multiligne("Aucune musique en cours", "Jouez une musique d'abord", (255, 0, 0), (255, 0, 0))
@@ -597,7 +600,7 @@ def reclasser_musique_actuelle(note):
     global en_mode_reclassification, ancienne_categorie, fichier_actuel
 
     ancienne_categorie = trouver_categorie_musique(fichier_actuel)
-    if fichier_actuel and ancienne_categorie:
+    if fichier_actuel:
         
         # Calculer l'ancienne note basée sur la catégorie
         ancienne_note = categorie_vers_note(ancienne_categorie)
@@ -631,7 +634,7 @@ def annuler_reclassification():
 
     en_mode_reclassification = False
     ancienne_categorie = None
-    afficher_texte_multiligne("Reclassification annulée", None, (255, 205, 100))
+    afficher_texte_multiligne(None,"Reclassification annulée", None, (255, 205, 100),True, 2000)
     print("Reclassification annulée")
 
 def toggle_pause():
@@ -643,7 +646,7 @@ def toggle_pause():
     if musique_en_cours:
         if is_paused:
             pygame.mixer.pause()
-            afficher_texte_multiligne(" PAUSE", "Appuyez sur 'ESPACE' pour reprendre", (255, 205, 100), (255, 205, 100), temporaire=True, duree=2000)
+            afficher_texte_multiligne(" PAUSE", "Appuyez sur 'ESPACE' pour reprendre", (255, 205, 100), (255, 205, 100), temporaire=False, duree=2000)
             print("Musique en pause")
         else:
             pygame.mixer.unpause()
@@ -702,6 +705,7 @@ while launched:
                 elif event.key == pygame.K_ESCAPE:
                     # Passer le fichier actuel sans le classer
                     passer_fichier_suivant()
+
             elif en_mode_reclassification:
                 # Mode reclassification - gérer les notes 0-9 et les touches +/-
                 if event.key == pygame.K_0:
@@ -727,6 +731,11 @@ while launched:
                 elif event.key == pygame.K_ESCAPE:
                     # Annuler la reclassification
                     annuler_reclassification()
+                elif event.key == pygame.K_PLUS:
+                    reclasser_musique_actuelle('+')
+                elif event.key == pygame.K_MINUS:
+                    reclasser_musique_actuelle('-')
+
             else:
                 # Mode normal
                 if event.key == pygame.K_RIGHT:
@@ -747,8 +756,6 @@ while launched:
                     ignorer_nouveaux_fichiers()
                     nouveaux_fichiers = []
                     jouer_musique_aleatoire()
-                elif event.key == pygame.K_ESCAPE:
-                    launched = False
                 elif event.key == pygame.K_DOWN:
                     reclasser_musique_actuelle('-')
                 elif event.key == pygame.K_UP:
@@ -787,9 +794,9 @@ while launched:
         screen.blit(message_temporaire, (x, 270))  # Plus bas pour ne pas écraser le nom
         
         # Afficher la deuxième ligne si elle existe
-        if message_temporaire_ligne2 is not None:
-            x2 = (window_resolution[0] - message_temporaire_ligne2.get_width()) // 2
-            screen.blit(message_temporaire_ligne2, (x2, 300))  # 30 pixels plus bas
+    if message_temporaire_ligne2 is not None:
+        x2 = (window_resolution[0] - message_temporaire_ligne2.get_width()) // 2
+        screen.blit(message_temporaire_ligne2, (x2, 300))  # 30 pixels plus bas
     
     
     pygame.display.flip()
