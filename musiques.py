@@ -549,7 +549,7 @@ def changer_note():
         # Trouver l'ancienne catégorie de cette musique
         ancienne_categorie = trouver_categorie_musique(fichier_actuel)
         ancienne_note = categorie_vers_note(ancienne_categorie)
-        afficher_texte_multiligne(f"Reclassification: {fichier_actuel.split('/')[-1].split('.')[0]}", f"Note actuelle: {ancienne_note} | 0-9: noter | +/-: ajuster | ÉCHAP: annuler", (25, 100, 255), (25, 100, 255), temporaire=True, duree=2000)
+        afficher_texte_multiligne(f"Reclassification: {fichier_actuel.split('/')[-1].split('.')[0]}", f"Note actuelle: {ancienne_note} | 0-9: noter | +/-: ajuster | ÉCHAP: annuler", (25, 100, 255), (25, 100, 255), temporaire=True, duree=20000)
         print(f"Reclassification de {fichier_actuel.split('/')[-1]}")
     else:
         afficher_texte_multiligne("Aucune musique en cours", "Jouez une musique d'abord", (255, 0, 0), (255, 0, 0))
